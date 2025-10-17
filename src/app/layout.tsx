@@ -20,7 +20,6 @@ export const metadata: Metadata = {
   authors: [{ name: "Fork Flow Team" }],
   icons: {
     icon: [
-      { url: "/favicon.ico", sizes: "any" },
       { url: "/favicon.png", sizes: "1024x1024", type: "image/png" },
     ],
     apple: [

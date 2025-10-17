@@ -55,14 +55,15 @@ export default function Home() {
       return matchesSearch && matchesFilter;
     });
 
-    // Sort items
+    // Sort items - create a new array to avoid mutation
+    const sorted = [...filtered];
     if (activeSort === 'price-low-high') {
-      filtered.sort((a, b) => a.price - b.price);
+      sorted.sort((a, b) => a.price - b.price);
     } else if (activeSort === 'price-high-low') {
-      filtered.sort((a, b) => b.price - a.price);
+      sorted.sort((a, b) => b.price - a.price);
     }
 
-    return filtered;
+    return sorted;
   }, [menuItems, searchQuery, activeFilter, activeSort]);
 
   const groupedItems = useMemo(() => {
@@ -78,38 +79,87 @@ export default function Home() {
     return groups;
   }, [filteredAndSortedItems]);
 
-  // Sort categories to put Starters first
+  // Sort categories based on active sort type
   const sortedCategories = useMemo(() => {
-    return categories.sort((a, b) => {
-      if (a.name === 'Starters') return -1;
-      if (b.name === 'Starters') return 1;
-      return 0;
-    });
-  }, [categories]);
+    if (activeSort === 'default') {
+      // Default behavior: Starters first, then original order
+      return categories.sort((a, b) => {
+        if (a.name === 'Starters') return -1;
+        if (b.name === 'Starters') return 1;
+        return 0;
+      });
+    } else {
+      // Price sorting: Sort categories based on their items' prices
+      return categories
+        .map(category => {
+          const items = groupedItems[category.id] || [];
+          const minPrice = items.length > 0 ? Math.min(...items.map(item => item.price)) : Infinity;
+          const maxPrice = items.length > 0 ? Math.max(...items.map(item => item.price)) : 0;
+          const avgPrice = items.length > 0 ? items.reduce((sum, item) => sum + item.price, 0) / items.length : 0;
+          
+          return {
+            ...category,
+            minPrice,
+            maxPrice,
+            avgPrice,
+            itemCount: items.length
+          };
+        })
+        .sort((a, b) => {
+          if (activeSort === 'price-low-high') {
+            // Sort by minimum price, then by average price for ties
+            if (a.minPrice !== b.minPrice) {
+              return a.minPrice - b.minPrice;
+            }
+            return a.avgPrice - b.avgPrice;
+          } else if (activeSort === 'price-high-low') {
+            // Sort by maximum price, then by average price for ties
+            if (a.maxPrice !== b.maxPrice) {
+              return b.maxPrice - a.maxPrice;
+            }
+            return b.avgPrice - a.avgPrice;
+          }
+          return 0;
+        });
+    }
+  }, [categories, groupedItems, activeSort]);
 
   const categoryList = useMemo(() => {
-    const categoryEntries = Object.entries(groupedItems).map(([categoryId, items]) => {
-      const category = categories.find(c => c.id === categoryId);
-      return {
-        id: categoryId,
-        name: category?.name || 'Unknown Category',
-        itemCount: items.length
-      };
-    });
-    
-    // Sort categories to put Starters first, then maintain original order
-    return categoryEntries.sort((a, b) => {
-      if (a.name === 'Starters') return -1;
-      if (b.name === 'Starters') return 1;
-      return 0;
-    });
-  }, [groupedItems, categories]);
+    if (activeSort === 'default') {
+      // Default: Use the same logic as sortedCategories
+      const categoryEntries = Object.entries(groupedItems).map(([categoryId, items]) => {
+        const category = categories.find(c => c.id === categoryId);
+        return {
+          id: categoryId,
+          name: category?.name || 'Unknown Category',
+          itemCount: items.length
+        };
+      });
+      
+      return categoryEntries.sort((a, b) => {
+        if (a.name === 'Starters') return -1;
+        if (b.name === 'Starters') return 1;
+        return 0;
+      });
+    } else {
+      // Price sorting: Use the same order as sortedCategories
+      return sortedCategories.map(category => ({
+        id: category.id,
+        name: category.name,
+        itemCount: category.itemCount || 0
+      }));
+    }
+  }, [groupedItems, categories, activeSort, sortedCategories]);
 
   const handlePortionChange = (itemId: string, portion: 'full' | 'half') => {
     setSelectedPortions(prev => ({
       ...prev,
       [itemId]: portion
     }));
+  };
+
+  const handleSortChange = (sort: SortType) => {
+    setActiveSort(sort);
   };
 
   const scrollToCategory = (categoryId: string) => {
@@ -204,7 +254,7 @@ export default function Home() {
           {/* Filter Bar */}
           <FilterBar
             onFilterChange={setActiveFilter}
-            onSortChange={setActiveSort}
+            onSortChange={handleSortChange}
             activeFilter={activeFilter}
             activeSort={activeSort}
           />
