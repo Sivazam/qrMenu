@@ -38,7 +38,7 @@ export default function MenuCard({ item, selectedPortion, onPortionChange }: Men
       whileHover={{ y: -2, boxShadow: "0 8px 30px rgba(0,0,0,0.3)" }}
       className="bg-card rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 border border-border"
     >
-      <div className="flex flex-col sm:flex-row p-3 sm:p-4 gap-3 sm:gap-4">
+      <div className="flex p-3 sm:p-4 gap-3 sm:gap-4">
         <div className="flex-1 min-w-0">
           <div className="flex items-start gap-2 sm:gap-3 mb-2">
             {getVegIndicator()}
@@ -94,11 +94,11 @@ export default function MenuCard({ item, selectedPortion, onPortionChange }: Men
         </div>
         
         {item.imageUrl && (
-          <div className="flex-shrink-0 self-center sm:self-auto">
+          <div className="flex-shrink-0">
             <img
               src={item.imageUrl}
               alt={item.name}
-              className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-lg shadow-sm border border-border"
+              className="w-16 h-16 sm:w-24 sm:h-24 object-cover rounded-lg shadow-sm border border-border"
             />
           </div>
         )}
