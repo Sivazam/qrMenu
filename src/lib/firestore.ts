@@ -17,7 +17,7 @@ export interface MenuItem {
   hasHalfPortion?: boolean;
   imageUrl?: string;
   name: string;
-  isVeg: boolean;
+  isVegetarian: boolean;
   price: number;
 }
 
@@ -110,7 +110,7 @@ export async function fetchFranchise(): Promise<Franchise | null> {
       id: TARGET_FRANCHISE_ID,
       name: "Premium Restaurant",
       address: "123 Main Street, City, State 12345",
-      logoUrl: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=100&h=100&fit=crop&crop=face"
+      logoUrl: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1200&h=200&fit=crop"
     };
   } catch (error) {
     console.error("Error fetching franchise, using sample data:", error);
@@ -118,7 +118,7 @@ export async function fetchFranchise(): Promise<Franchise | null> {
       id: TARGET_FRANCHISE_ID,
       name: "Premium Restaurant",
       address: "123 Main Street, City, State 12345",
-      logoUrl: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=100&h=100&fit=crop&crop=face"
+      logoUrl: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1200&h=200&fit=crop"
     };
   }
 }

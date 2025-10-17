@@ -15,7 +15,7 @@ export default function MenuCard({ item, selectedPortion, onPortionChange }: Men
     : item.price;
 
   const getVegIndicator = () => {
-    if (item.isVeg) {
+    if (item.isVegetarian) {
       return (
         <div className="w-5 h-5 bg-white border-2 border-green-600 rounded-sm flex items-center justify-center">
           <div className="w-2.5 h-2.5 bg-green-600 rounded-full"></div>

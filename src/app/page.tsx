@@ -47,9 +47,9 @@ export default function Home() {
       
       let matchesFilter = true;
       if (activeFilter === 'veg') {
-        matchesFilter = item.isVeg;
+        matchesFilter = item.isVegetarian;
       } else if (activeFilter === 'non-veg') {
-        matchesFilter = !item.isVeg;
+        matchesFilter = !item.isVegetarian;
       }
 
       return matchesSearch && matchesFilter;
@@ -78,14 +78,30 @@ export default function Home() {
     return groups;
   }, [filteredAndSortedItems]);
 
+  // Sort categories to put Starters first
+  const sortedCategories = useMemo(() => {
+    return categories.sort((a, b) => {
+      if (a.name === 'Starters') return -1;
+      if (b.name === 'Starters') return 1;
+      return 0;
+    });
+  }, [categories]);
+
   const categoryList = useMemo(() => {
-    return Object.entries(groupedItems).map(([categoryId, items]) => {
+    const categoryEntries = Object.entries(groupedItems).map(([categoryId, items]) => {
       const category = categories.find(c => c.id === categoryId);
       return {
         id: categoryId,
         name: category?.name || 'Unknown Category',
         itemCount: items.length
       };
+    });
+    
+    // Sort categories to put Starters first, then maintain original order
+    return categoryEntries.sort((a, b) => {
+      if (a.name === 'Starters') return -1;
+      if (b.name === 'Starters') return 1;
+      return 0;
     });
   }, [groupedItems, categories]);
 
@@ -99,7 +115,7 @@ export default function Home() {
   const scrollToCategory = (categoryId: string) => {
     const element = document.getElementById(`category-${categoryId}`);
     if (element) {
-      const headerHeight = 120; // Approximate header height
+      const headerHeight = 180; // Increased to account for sticky header with search and filters
       const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
       const offsetPosition = elementPosition - headerHeight;
 
@@ -126,50 +142,30 @@ export default function Home() {
     <div className="min-h-screen bg-background text-foreground">
       {/* Hero Banner */}
       {franchise && (
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="relative h-64 md:h-80 overflow-hidden"
-        >
-          {/* Background Image */}
-          <div className="absolute inset-0">
+        <div className="relative">
+          {/* Landscape Logo */}
+          <div className="h-32 md:h-40 overflow-hidden bg-black">
             <img
-              src={franchise.logoUrl || "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=1200&h=400&fit=crop"}
-              alt={franchise.name}
-              className="w-full h-full object-cover"
+              src={franchise.logoUrl || "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1200&h=200&fit=crop"}
+              alt="Restaurant Logo"
+              className="w-full h-full object-contain"
+              style={{ objectFit: 'contain' }}
             />
-            <div className="absolute inset-0 bg-black bg-opacity-60"></div>
           </div>
           
-          {/* Hero Content */}
-          <div className="relative z-10 h-full flex items-center justify-center text-center">
-            <div className="px-4">
-              <motion.h1
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-                className="text-4xl md:text-6xl font-bold text-white mb-4"
-              >
-                {franchise.name}
-              </motion.h1>
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-                className="text-lg md:text-xl text-gray-200"
-              >
-                {franchise.address}
-              </motion.p>
-            </div>
+          {/* Address Below Image */}
+          <div className="bg-card border-b border-border px-4 py-3 text-center">
+            <p className="text-muted-foreground text-sm md:text-base font-medium">
+              {franchise.address}
+            </p>
           </div>
-        </motion.div>
+        </div>
       )}
 
       {/* Header Section */}
       <header className="sticky top-0 z-20 bg-card/95 backdrop-blur-sm border-b border-border">
         <div className="max-w-4xl mx-auto p-4">
-          {/* Search Bar */}
+          {/* Search Bar - Full Width */}
           <div className="mb-4">
             <SearchBar onSearch={setSearchQuery} />
           </div>
@@ -198,12 +194,14 @@ export default function Home() {
           </motion.div>
         ) : (
           <div className="space-y-8">
-            {Object.entries(groupedItems).map(([categoryId, items]) => {
-              const category = categories.find(c => c.id === categoryId);
+            {sortedCategories.map((category) => {
+              const items = groupedItems[category.id];
+              if (!items || items.length === 0) return null;
+              
               return (
-                <div key={categoryId} id={`category-${categoryId}`}>
+                <div key={category.id} id={`category-${category.id}`}>
                   <CategorySection
-                    categoryName={category?.name || 'Unknown Category'}
+                    categoryName={category.name}
                     items={items}
                     onPortionChange={handlePortionChange}
                     selectedPortions={selectedPortions}

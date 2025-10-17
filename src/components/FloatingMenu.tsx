@@ -27,12 +27,13 @@ export default function FloatingMenu({ categories, onCategoryClick }: FloatingMe
     <>
       {/* Floating Button */}
       <motion.button
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-6 w-14 h-14 bg-primary text-primary-foreground rounded-full shadow-lg flex items-center justify-center z-40 hover:bg-primary/90 transition-colors duration-200"
+        className="fixed bottom-6 right-6 bg-primary text-primary-foreground rounded-full shadow-lg flex items-center justify-center z-40 hover:bg-primary/90 transition-colors duration-200 px-4 py-3 gap-2"
       >
-        {isOpen ? <FiX className="w-6 h-6" /> : <FiMenu className="w-6 h-6" />}
+        {isOpen ? <FiX className="w-5 h-5" /> : <FiMenu className="w-5 h-5" />}
+        <span className="text-sm font-medium">Menu</span>
       </motion.button>
 
       {/* Overlay */}
@@ -43,7 +44,7 @@ export default function FloatingMenu({ categories, onCategoryClick }: FloatingMe
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-black/50 z-30"
+            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30"
             onClick={() => setIsOpen(false)}
           />
         )}

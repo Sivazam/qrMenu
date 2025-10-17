@@ -37,9 +37,9 @@ export default function FilterBar({
   const getFilterStyle = (filter: FilterType) => {
     if (activeFilter === filter) {
       const activeFilterConfig = filters.find(f => f.type === filter);
-      return `${activeFilterConfig?.color} ring-2 ring-offset-2 ring-primary`;
+      return `${activeFilterConfig?.color} shadow-md`;
     }
-    return 'bg-card text-muted-foreground border border-border hover:bg-muted';
+    return 'bg-card text-muted-foreground border border-border hover:bg-muted hover:border-primary/50';
   };
 
   return (
@@ -53,10 +53,10 @@ export default function FilterBar({
         {filters.map((filter) => (
           <motion.button
             key={filter.type}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => onFilterChange(filter.type)}
-            className={`px-4 py-2 rounded-full font-medium transition-all duration-200 ${getFilterStyle(filter.type)}`}
+            className={`px-6 py-2 rounded-lg font-medium transition-all duration-200 ${getFilterStyle(filter.type)}`}
           >
             {filter.label}
           </motion.button>
@@ -65,10 +65,10 @@ export default function FilterBar({
 
       <div className="relative">
         <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
           onClick={() => setShowSortDropdown(!showSortDropdown)}
-          className="flex items-center gap-2 px-4 py-2 bg-card border border-border rounded-full text-muted-foreground hover:bg-muted transition-all duration-200"
+          className="flex items-center gap-2 px-6 py-2 bg-card border border-border rounded-lg text-muted-foreground hover:bg-muted hover:border-primary/50 transition-all duration-200"
         >
           Sort By
           <FiChevronDown className={`w-4 h-4 transition-transform duration-200 ${showSortDropdown ? 'rotate-180' : ''}`} />
