@@ -128,12 +128,43 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen bg-black flex items-center justify-center">
         <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full"
-        />
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ 
+            opacity: 1, 
+            scale: 1,
+            y: [0, -20, 0]
+          }}
+          transition={{ 
+            duration: 0.5,
+            y: {
+              duration: 2,
+              repeat: Infinity,
+              repeatType: "reverse",
+              ease: "easeInOut"
+            }
+          }}
+          className="relative"
+        >
+          <img
+            src="/favicon.png"
+            alt="Loading..."
+            className="w-24 h-24 sm:w-32 sm:h-32 object-contain"
+          />
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: [0.3, 1, 0.3] }}
+            transition={{
+              duration: 1.5,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+            className="absolute inset-0 flex items-center justify-center"
+          >
+            <div className="w-20 h-20 sm:w-28 sm:h-28 border-2 border-white/30 rounded-full" />
+          </motion.div>
+        </motion.div>
       </div>
     );
   }

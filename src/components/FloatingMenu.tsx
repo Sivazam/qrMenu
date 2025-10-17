@@ -30,10 +30,10 @@ export default function FloatingMenu({ categories, onCategoryClick }: FloatingMe
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-6 bg-primary text-primary-foreground rounded-full shadow-lg flex items-center justify-center z-40 hover:bg-primary/90 transition-colors duration-200 px-4 py-3 gap-2"
+        className="fixed bottom-4 sm:bottom-6 right-4 sm:right-6 bg-primary text-primary-foreground rounded-full shadow-lg flex items-center justify-center z-40 hover:bg-primary/90 transition-colors duration-200 px-3 sm:px-4 py-2 sm:py-3 gap-2"
       >
-        {isOpen ? <FiX className="w-5 h-5" /> : <FiMenu className="w-5 h-5" />}
-        <span className="text-sm font-medium">Menu</span>
+        {isOpen ? <FiX className="w-4 h-4 sm:w-5 sm:h-5" /> : <FiMenu className="w-4 h-4 sm:w-5 sm:h-5" />}
+        <span className="text-xs sm:text-sm font-medium">Menu</span>
       </motion.button>
 
       {/* Overlay */}
@@ -58,22 +58,22 @@ export default function FloatingMenu({ categories, onCategoryClick }: FloatingMe
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             transition={{ duration: 0.2 }}
-            className="fixed bottom-24 right-6 w-72 bg-card border border-border rounded-xl shadow-2xl z-40 max-h-96 overflow-hidden"
+            className="fixed bottom-20 sm:bottom-24 right-4 sm:right-6 w-64 sm:w-72 bg-card border border-border rounded-xl shadow-2xl z-40 max-h-80 sm:max-h-96 overflow-hidden"
           >
-            <div className="p-4 border-b border-border">
-              <h3 className="font-semibold text-foreground text-lg">Menu Categories</h3>
+            <div className="p-3 sm:p-4 border-b border-border">
+              <h3 className="font-semibold text-foreground text-base sm:text-lg">Menu Categories</h3>
             </div>
             
-            <div className="max-h-80 overflow-y-auto">
+            <div className="max-h-64 sm:max-h-80 overflow-y-auto">
               {categories.map((category) => (
                 <motion.button
                   key={category.id}
                   whileHover={{ backgroundColor: 'hsl(var(--accent))' }}
                   onClick={() => handleCategoryClick(category.id)}
-                  className="w-full text-left px-4 py-3 flex items-center justify-between hover:bg-accent hover:text-accent-foreground transition-colors duration-200 border-b border-border last:border-b-0"
+                  className="w-full text-left px-3 sm:px-4 py-2 sm:py-3 flex items-center justify-between hover:bg-accent hover:text-accent-foreground transition-colors duration-200 border-b border-border last:border-b-0"
                 >
-                  <span className="text-foreground font-medium">{category.name}</span>
-                  <span className="text-sm text-muted-foreground bg-muted px-2 py-1 rounded-full">
+                  <span className="text-foreground font-medium text-sm sm:text-base">{category.name}</span>
+                  <span className="text-xs sm:text-sm text-muted-foreground bg-muted px-2 py-1 rounded-full">
                     {category.itemCount}
                   </span>
                 </motion.button>

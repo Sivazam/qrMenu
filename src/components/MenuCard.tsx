@@ -38,16 +38,16 @@ export default function MenuCard({ item, selectedPortion, onPortionChange }: Men
       whileHover={{ y: -2, boxShadow: "0 8px 30px rgba(0,0,0,0.3)" }}
       className="bg-card rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 border border-border"
     >
-      <div className="flex p-4 gap-4">
-        <div className="flex-1">
-          <div className="flex items-start gap-3 mb-2">
+      <div className="flex flex-col sm:flex-row p-3 sm:p-4 gap-3 sm:gap-4">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-start gap-2 sm:gap-3 mb-2">
             {getVegIndicator()}
-            <div className="flex-1">
-              <h3 className="font-semibold text-foreground text-lg leading-tight">
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-foreground text-base sm:text-lg leading-tight">
                 {item.name}
               </h3>
-              <div className="flex items-center gap-2 mt-1">
-                <span className="text-primary font-bold text-lg">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mt-1">
+                <span className="text-primary font-bold text-base sm:text-lg">
                   ₹{displayPrice}
                 </span>
                 {item.hasHalfPortion && (
@@ -94,11 +94,11 @@ export default function MenuCard({ item, selectedPortion, onPortionChange }: Men
         </div>
         
         {item.imageUrl && (
-          <div className="flex-shrink-0">
+          <div className="flex-shrink-0 self-center sm:self-auto">
             <img
               src={item.imageUrl}
               alt={item.name}
-              className="w-24 h-24 object-cover rounded-lg shadow-sm border border-border"
+              className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-lg shadow-sm border border-border"
             />
           </div>
         )}

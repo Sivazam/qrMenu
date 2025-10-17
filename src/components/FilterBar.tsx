@@ -56,7 +56,7 @@ export default function FilterBar({
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => onFilterChange(filter.type)}
-            className={`px-6 py-2 rounded-lg font-medium transition-all duration-200 ${getFilterStyle(filter.type)}`}
+            className={`px-3 sm:px-6 py-2 rounded-lg font-medium transition-all duration-200 text-sm sm:text-base ${getFilterStyle(filter.type)}`}
           >
             {filter.label}
           </motion.button>
@@ -68,7 +68,7 @@ export default function FilterBar({
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={() => setShowSortDropdown(!showSortDropdown)}
-          className="flex items-center gap-2 px-6 py-2 bg-card border border-border rounded-lg text-muted-foreground hover:bg-muted hover:border-primary/50 transition-all duration-200"
+          className="flex items-center gap-2 px-4 py-2 sm:px-6 bg-card border border-border rounded-lg text-muted-foreground hover:bg-muted hover:border-primary/50 transition-all duration-200 text-sm sm:text-base"
         >
           Sort By
           <FiChevronDown className={`w-4 h-4 transition-transform duration-200 ${showSortDropdown ? 'rotate-180' : ''}`} />
@@ -79,7 +79,7 @@ export default function FilterBar({
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="absolute right-0 mt-2 w-48 bg-card border border-border rounded-lg shadow-lg z-50"
+            className="absolute right-0 mt-2 w-48 sm:w-56 bg-card border border-border rounded-lg shadow-lg z-50 max-w-[calc(100vw-2rem)]"
           >
             {sortOptions.map((option) => (
               <button
@@ -88,8 +88,8 @@ export default function FilterBar({
                   onSortChange(option.type);
                   setShowSortDropdown(false);
                 }}
-                className={`w-full text-left px-4 py-2 hover:bg-muted transition-colors duration-200 ${
-                  activeSort === option.type ? 'bg-primary text-primary-foreground font-medium' : 'text-foreground'
+                className={`w-full text-left px-3 sm:px-4 py-2 hover:bg-muted transition-colors duration-200 text-sm sm:text-base ${
+                  activeSort === option.type ? 'bg-primary text-primary-foreground font-medium' : 'text-foreground hover:text-foreground'
                 } ${option.type === 'default' ? 'rounded-t-lg' : ''} ${
                   option.type === 'price-high-low' ? 'rounded-b-lg' : ''
                 }`}
