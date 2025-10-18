@@ -299,6 +299,23 @@ export default function Home() {
         categories={categoryList}
         onCategoryClick={scrollToCategory}
       />
+
+      {/* Footer */}
+      <footer className="bg-gray-900 text-white py-8 mt-16">
+        <div className="container mx-auto px-4 text-center">
+          <p className="text-lg font-sans">
+            Build with <span className="text-red-500">♥</span> by{' '}
+            <a
+              href="https://wa.me/919014882779?text=Hi%2C%20i%20want%20to%20discus%20about%20a%20requirement"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-400 hover:text-blue-300 transition-colors duration-200 font-sans"
+            >
+              HarteLabs
+            </a>
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }
