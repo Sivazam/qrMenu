@@ -8,7 +8,7 @@ import CategorySection from '@/components/CategorySection';
 import FloatingMenu from '@/components/FloatingMenu';
 import PromotionModal from '@/components/PromotionModal';
 import OfferButton from '@/components/OfferButton';
-import { fetchMenuItems, fetchCategories, fetchFranchise, MenuItem, Category } from '@/lib/firestore';
+import { fetchMenuItems, fetchCategories, fetchFranchise, getPromotionImage, MenuItem, Category } from '@/lib/firestore';
 
 export default function Home() {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
@@ -21,6 +21,7 @@ export default function Home() {
   const [selectedPortions, setSelectedPortions] = useState<Record<string, 'full' | 'half'>>({});
   const [showPromotionModal, setShowPromotionModal] = useState(false);
   const [showOfferButton, setShowOfferButton] = useState(false);
+  const [hasPromotion, setHasPromotion] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -44,22 +45,36 @@ export default function Home() {
     loadData();
   }, []);
 
-  // Show promotion modal on every page load
+  // Show promotion modal on every page load (only if promotion exists)
   useEffect(() => {
-    // Show modal after a short delay to allow page to load
-    const modalTimer = setTimeout(() => {
-      setShowPromotionModal(true);
-    }, 1500); // 1.5 second delay
-    
-    // Show offer button after a longer delay
-    const buttonTimer = setTimeout(() => {
-      setShowOfferButton(true);
-    }, 3000); // 3 second delay
-    
-    return () => {
-      clearTimeout(modalTimer);
-      clearTimeout(buttonTimer);
+    const checkPromotionAndShowModal = async () => {
+      try {
+        const promotionUrl = await getPromotionImage();
+        setHasPromotion(!!promotionUrl);
+        
+        if (promotionUrl) {
+          // Show modal after a short delay to allow page to load
+          const modalTimer = setTimeout(() => {
+            setShowPromotionModal(true);
+          }, 1500); // 1.5 second delay
+          
+          // Show offer button after a longer delay
+          const buttonTimer = setTimeout(() => {
+            setShowOfferButton(true);
+          }, 3000); // 3 second delay
+          
+          return () => {
+            clearTimeout(modalTimer);
+            clearTimeout(buttonTimer);
+          };
+        }
+      } catch (error) {
+        console.error('Error checking promotion availability:', error);
+        setHasPromotion(false);
+      }
     };
+
+    checkPromotionAndShowModal();
   }, []);
 
   const filteredAndSortedItems = useMemo(() => {
@@ -354,10 +369,12 @@ export default function Home() {
       />
 
       {/* Offer Button */}
-      <OfferButton
-        onClick={handleOfferButtonClick}
-        isVisible={showOfferButton}
-      />
+      {hasPromotion && (
+        <OfferButton
+          onClick={handleOfferButtonClick}
+          isVisible={showOfferButton}
+        />
+      )}
     </div>
   );
 }

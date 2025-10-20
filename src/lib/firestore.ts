@@ -130,13 +130,18 @@ export async function getPromotionImage(): Promise<string | null> {
     
     if (promotionsSnapshot.empty) {
       console.log("No promotions found in Firestore");
-      // Return sample promotion image for testing
-      return "https://images.unsplash.com/photo-1606904983936-eb7b79a62aa8?w=800&h=600&fit=crop";
+      return null; // No promotion content to display
     }
     
     // Get the first promotion document
     const firstPromotion = promotionsSnapshot.docs[0];
     const promotionData = firstPromotion.data();
+    
+    // Check if status is true (promotion should be displayed)
+    if (promotionData.status !== true) {
+      console.log("Promotion status is not true, not displaying promotion");
+      return null; // Promotion is disabled
+    }
     
     // Check if images array exists and has at least one item
     if (promotionData.images && Array.isArray(promotionData.images) && promotionData.images.length > 0) {
@@ -144,11 +149,9 @@ export async function getPromotionImage(): Promise<string | null> {
     }
     
     console.log("No images found in promotion document");
-    // Return sample promotion image for testing
-    return "https://images.unsplash.com/photo-1606904983936-eb7b79a62aa8?w=800&h=600&fit=crop";
+    return null; // No promotion content to display
   } catch (error) {
     console.error("Error fetching promotion image:", error);
-    // Return sample promotion image for testing
-    return "https://images.unsplash.com/photo-1606904983936-eb7b79a62aa8?w=800&h=600&fit=crop";
+    return null; // No promotion content to display
   }
 }

@@ -24,10 +24,18 @@ export default function PromotionModal({ onClose, isOpen }: PromotionModalProps)
           setImageUrl(url);
         } else {
           setError('No promotion available');
+          // If no promotion is available, close the modal after a short delay
+          setTimeout(() => {
+            onClose();
+          }, 1000);
         }
       } catch (err) {
         setError('Failed to load promotion');
         console.error('Error fetching promotion:', err);
+        // If there's an error, close the modal after a short delay
+        setTimeout(() => {
+          onClose();
+        }, 1000);
       } finally {
         setLoading(false);
       }
@@ -36,7 +44,7 @@ export default function PromotionModal({ onClose, isOpen }: PromotionModalProps)
     if (isOpen) {
       fetchPromotionImage();
     }
-  }, [isOpen]);
+  }, [isOpen, onClose]);
 
   const handleClose = () => {
     onClose();
