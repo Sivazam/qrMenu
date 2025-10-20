@@ -6,6 +6,8 @@ import SearchBar from '@/components/SearchBar';
 import FilterBar, { FilterType, SortType } from '@/components/FilterBar';
 import CategorySection from '@/components/CategorySection';
 import FloatingMenu from '@/components/FloatingMenu';
+import PromotionModal from '@/components/PromotionModal';
+import OfferButton from '@/components/OfferButton';
 import { fetchMenuItems, fetchCategories, fetchFranchise, MenuItem, Category } from '@/lib/firestore';
 
 export default function Home() {
@@ -17,6 +19,8 @@ export default function Home() {
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
   const [activeSort, setActiveSort] = useState<SortType>('default');
   const [selectedPortions, setSelectedPortions] = useState<Record<string, 'full' | 'half'>>({});
+  const [showPromotionModal, setShowPromotionModal] = useState(false);
+  const [showOfferButton, setShowOfferButton] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -38,6 +42,24 @@ export default function Home() {
     };
 
     loadData();
+  }, []);
+
+  // Show promotion modal on every page load
+  useEffect(() => {
+    // Show modal after a short delay to allow page to load
+    const modalTimer = setTimeout(() => {
+      setShowPromotionModal(true);
+    }, 1500); // 1.5 second delay
+    
+    // Show offer button after a longer delay
+    const buttonTimer = setTimeout(() => {
+      setShowOfferButton(true);
+    }, 3000); // 3 second delay
+    
+    return () => {
+      clearTimeout(modalTimer);
+      clearTimeout(buttonTimer);
+    };
   }, []);
 
   const filteredAndSortedItems = useMemo(() => {
@@ -174,6 +196,14 @@ export default function Home() {
         behavior: 'smooth'
       });
     }
+  };
+
+  const handleClosePromotionModal = () => {
+    setShowPromotionModal(false);
+  };
+
+  const handleOfferButtonClick = () => {
+    setShowPromotionModal(true);
   };
 
   if (loading) {
@@ -316,6 +346,18 @@ export default function Home() {
           </p>
         </div>
       </footer>
+
+      {/* Promotion Modal */}
+      <PromotionModal
+        isOpen={showPromotionModal}
+        onClose={handleClosePromotionModal}
+      />
+
+      {/* Offer Button */}
+      <OfferButton
+        onClick={handleOfferButtonClick}
+        isVisible={showOfferButton}
+      />
     </div>
   );
 }

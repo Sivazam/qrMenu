@@ -122,3 +122,33 @@ export async function fetchFranchise(): Promise<Franchise | null> {
     };
   }
 }
+
+export async function getPromotionImage(): Promise<string | null> {
+  try {
+    const promotionsCollection = collection(db, "promotions");
+    const promotionsSnapshot = await getDocs(promotionsCollection);
+    
+    if (promotionsSnapshot.empty) {
+      console.log("No promotions found in Firestore");
+      // Return sample promotion image for testing
+      return "https://images.unsplash.com/photo-1606904983936-eb7b79a62aa8?w=800&h=600&fit=crop";
+    }
+    
+    // Get the first promotion document
+    const firstPromotion = promotionsSnapshot.docs[0];
+    const promotionData = firstPromotion.data();
+    
+    // Check if images array exists and has at least one item
+    if (promotionData.images && Array.isArray(promotionData.images) && promotionData.images.length > 0) {
+      return promotionData.images[0]; // Return the first image (0th item)
+    }
+    
+    console.log("No images found in promotion document");
+    // Return sample promotion image for testing
+    return "https://images.unsplash.com/photo-1606904983936-eb7b79a62aa8?w=800&h=600&fit=crop";
+  } catch (error) {
+    console.error("Error fetching promotion image:", error);
+    // Return sample promotion image for testing
+    return "https://images.unsplash.com/photo-1606904983936-eb7b79a62aa8?w=800&h=600&fit=crop";
+  }
+}
