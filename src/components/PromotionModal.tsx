@@ -14,6 +14,7 @@ export default function PromotionModal({ onClose, isOpen }: PromotionModalProps)
   const [imageUrl, setImageUrl] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
+  const [imageDimensions, setImageDimensions] = useState({ width: 0, height: 0 });
 
   useEffect(() => {
     const fetchPromotionImage = async () => {
@@ -46,6 +47,14 @@ export default function PromotionModal({ onClose, isOpen }: PromotionModalProps)
     }
   }, [isOpen, onClose]);
 
+  const handleImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const img = e.currentTarget;
+    setImageDimensions({
+      width: img.naturalWidth,
+      height: img.naturalHeight
+    });
+  };
+
   const handleClose = () => {
     onClose();
   };
@@ -54,6 +63,48 @@ export default function PromotionModal({ onClose, isOpen }: PromotionModalProps)
     if (e.target === e.currentTarget) {
       handleClose();
     }
+  };
+
+  // Calculate modal max size based on viewport and image aspect ratio
+  const getModalStyle = () => {
+    if (!imageDimensions.width || !imageDimensions.height) {
+      return { maxWidth: '90vw', maxHeight: '90vh' };
+    }
+
+    const aspectRatio = imageDimensions.width / imageDimensions.height;
+    const viewportWidth = window.innerWidth * 0.9;
+    const viewportHeight = window.innerHeight * 0.9;
+    
+    let modalWidth, modalHeight;
+    
+    if (aspectRatio > 1) {
+      // Wider image - base on width
+      modalWidth = Math.min(viewportWidth, imageDimensions.width);
+      modalHeight = modalWidth / aspectRatio;
+      
+      // Check if height exceeds viewport
+      if (modalHeight > viewportHeight) {
+        modalHeight = viewportHeight;
+        modalWidth = modalHeight * aspectRatio;
+      }
+    } else {
+      // Taller image - base on height
+      modalHeight = Math.min(viewportHeight, imageDimensions.height);
+      modalWidth = modalHeight * aspectRatio;
+      
+      // Check if width exceeds viewport
+      if (modalWidth > viewportWidth) {
+        modalWidth = viewportWidth;
+        modalHeight = modalWidth / aspectRatio;
+      }
+    }
+
+    return {
+      width: `${modalWidth}px`,
+      height: `${modalHeight}px`,
+      maxWidth: '90vw',
+      maxHeight: '90vh'
+    };
   };
 
   return (
@@ -77,37 +128,37 @@ export default function PromotionModal({ onClose, isOpen }: PromotionModalProps)
               stiffness: 300,
               damping: 30
             }}
-            className="relative bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden"
+            className="relative bg-black shadow-2xl rounded-2xl overflow-hidden"
+            style={getModalStyle()}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Close Button */}
+            {/* Close Button - Positioned on top of image */}
             <button
               onClick={handleClose}
-              className="absolute top-4 right-4 z-10 bg-white/90 backdrop-blur-sm rounded-full p-2 shadow-lg hover:bg-white transition-all duration-200 hover:scale-110"
+              className="absolute top-4 right-4 z-10 bg-black/60 backdrop-blur-sm rounded-full p-2 shadow-lg hover:bg-black/80 transition-all duration-200 hover:scale-110"
               aria-label="Close promotion"
             >
-              <X className="w-5 h-5 text-gray-700" />
+              <X className="w-5 h-5 text-white" />
             </button>
 
             {/* Content */}
-            <div className="relative">
+            <div className="relative w-full h-full">
               {loading ? (
-                <div className="flex items-center justify-center h-64 bg-gray-100">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                <div className="flex items-center justify-center w-full h-full bg-black">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
                 </div>
               ) : error ? (
-                <div className="flex items-center justify-center h-64 bg-gray-100">
-                  <p className="text-gray-500 text-center px-4">{error}</p>
+                <div className="flex items-center justify-center w-full h-full bg-black">
+                  <p className="text-white text-center px-4">{error}</p>
                 </div>
               ) : imageUrl ? (
-                <div className="relative">
-                  <img
-                    src={imageUrl}
-                    alt="Promotion"
-                    className="w-full h-auto object-cover"
-                    onError={() => setError('Failed to load image')}
-                  />
-                </div>
+                <img
+                  src={imageUrl}
+                  alt="Promotion"
+                  className="w-full h-full object-contain"
+                  onLoad={handleImageLoad}
+                  onError={() => setError('Failed to load image')}
+                />
               ) : null}
             </div>
           </motion.div>

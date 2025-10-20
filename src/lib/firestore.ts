@@ -1,5 +1,6 @@
-import { collection, getDocs, DocumentData, query, where } from "firebase/firestore";
-import { db } from "./firebase";
+import { collection, getDocs, DocumentData, query, where, doc, updateDoc, getDoc } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { db, storage } from "./firebase";
 import { sampleMenuItems, sampleCategories } from "./sample-data";
 import { FRANCHISE_CONFIG } from "./config";
 
@@ -153,5 +154,105 @@ export async function getPromotionImage(): Promise<string | null> {
   } catch (error) {
     console.error("Error fetching promotion image:", error);
     return null; // No promotion content to display
+  }
+}
+
+export async function getPromotionStatus(): Promise<boolean> {
+  try {
+    const promotionsCollection = collection(db, "promotions");
+    const promotionsSnapshot = await getDocs(promotionsCollection);
+    
+    if (promotionsSnapshot.empty) {
+      return false;
+    }
+    
+    const firstPromotion = promotionsSnapshot.docs[0];
+    const promotionData = firstPromotion.data();
+    
+    return promotionData.status === true;
+  } catch (error) {
+    console.error("Error fetching promotion status:", error);
+    return false;
+  }
+}
+
+export async function updatePromotionStatus(newStatus: boolean): Promise<void> {
+  try {
+    const promotionsCollection = collection(db, "promotions");
+    const promotionsSnapshot = await getDocs(promotionsCollection);
+    
+    if (promotionsSnapshot.empty) {
+      throw new Error("No promotion document found");
+    }
+    
+    const firstPromotionDoc = promotionsSnapshot.docs[0];
+    const promotionDocRef = doc(db, "promotions", firstPromotionDoc.id);
+    
+    await updateDoc(promotionDocRef, {
+      status: newStatus
+    });
+    
+    console.log(`Promotion status updated to: ${newStatus}`);
+  } catch (error) {
+    console.error("Error updating promotion status:", error);
+    throw error;
+  }
+}
+
+export async function uploadPromotionImage(file: File): Promise<string> {
+  try {
+    // Create a unique filename with timestamp
+    const timestamp = new Date().getTime();
+    const filename = `promotion_${timestamp}_${file.name}`;
+    
+    // Create storage reference
+    const storageRef = ref(storage, `promotions/${filename}`);
+    
+    // Upload file
+    await uploadBytes(storageRef, file);
+    
+    // Get download URL
+    const downloadURL = await getDownloadURL(storageRef);
+    
+    console.log("Image uploaded successfully:", downloadURL);
+    return downloadURL;
+  } catch (error) {
+    console.error("Error uploading image:", error);
+    throw error;
+  }
+}
+
+export async function updatePromotionImage(imageUrl: string): Promise<void> {
+  try {
+    const promotionsCollection = collection(db, "promotions");
+    const promotionsSnapshot = await getDocs(promotionsCollection);
+    
+    if (promotionsSnapshot.empty) {
+      throw new Error("No promotion document found");
+    }
+    
+    const firstPromotionDoc = promotionsSnapshot.docs[0];
+    const promotionDocRef = doc(db, "promotions", firstPromotionDoc.id);
+    
+    // Get current document data
+    const currentData = firstPromotionDoc.data();
+    
+    // Update images array - replace first element or create new array
+    let updatedImages: string[];
+    if (currentData.images && Array.isArray(currentData.images)) {
+      updatedImages = [...currentData.images];
+      updatedImages[0] = imageUrl; // Replace first element
+    } else {
+      updatedImages = [imageUrl]; // Create new array with the image
+    }
+    
+    await updateDoc(promotionDocRef, {
+      images: updatedImages
+    });
+    
+    console.log("Promotion image updated successfully");
+  } catch (error) {
+    console.error("Error updating promotion image:", error);
+    throw error;
   }
 }

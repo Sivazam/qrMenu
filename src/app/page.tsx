@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
 import SearchBar from '@/components/SearchBar';
 import FilterBar, { FilterType, SortType } from '@/components/FilterBar';
@@ -8,7 +8,20 @@ import CategorySection from '@/components/CategorySection';
 import FloatingMenu from '@/components/FloatingMenu';
 import PromotionModal from '@/components/PromotionModal';
 import OfferButton from '@/components/OfferButton';
-import { fetchMenuItems, fetchCategories, fetchFranchise, getPromotionImage, MenuItem, Category } from '@/lib/firestore';
+import AdminCodeModal from '@/components/AdminCodeModal';
+import AdminToggleModal from '@/components/AdminToggleModal';
+import { 
+  fetchMenuItems, 
+  fetchCategories, 
+  fetchFranchise, 
+  getPromotionImage, 
+  getPromotionStatus,
+  updatePromotionStatus,
+  uploadPromotionImage,
+  updatePromotionImage,
+  MenuItem, 
+  Category 
+} from '@/lib/firestore';
 
 export default function Home() {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
@@ -22,6 +35,15 @@ export default function Home() {
   const [showPromotionModal, setShowPromotionModal] = useState(false);
   const [showOfferButton, setShowOfferButton] = useState(false);
   const [hasPromotion, setHasPromotion] = useState(false);
+  const [showAdminCodeModal, setShowAdminCodeModal] = useState(false);
+  const [showAdminToggleModal, setShowAdminToggleModal] = useState(false);
+  const [currentPromotionStatus, setCurrentPromotionStatus] = useState(false);
+  const [currentPromotionImage, setCurrentPromotionImage] = useState<string | null>(null);
+  
+  // Long press detection refs
+  const logoRef = useRef<HTMLDivElement>(null);
+  const longPressTimer = useRef<NodeJS.Timeout | null>(null);
+  const isLongPressing = useRef(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -50,7 +72,11 @@ export default function Home() {
     const checkPromotionAndShowModal = async () => {
       try {
         const promotionUrl = await getPromotionImage();
+        const promotionStatus = await getPromotionStatus();
+        
         setHasPromotion(!!promotionUrl);
+        setCurrentPromotionStatus(promotionStatus);
+        setCurrentPromotionImage(promotionUrl);
         
         if (promotionUrl) {
           // Show modal after a short delay to allow page to load
@@ -76,6 +102,70 @@ export default function Home() {
 
     checkPromotionAndShowModal();
   }, []);
+
+  // Long press handlers
+  const handleLogoMouseDown = () => {
+    isLongPressing.current = false;
+    longPressTimer.current = setTimeout(() => {
+      isLongPressing.current = true;
+      setShowAdminCodeModal(true);
+    }, 4000); // 4 seconds
+  };
+
+  const handleLogoMouseUp = () => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+  };
+
+  const handleLogoMouseLeave = () => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+  };
+
+  const handleLogoTouchStart = () => {
+    isLongPressing.current = false;
+    longPressTimer.current = setTimeout(() => {
+      isLongPressing.current = true;
+      setShowAdminCodeModal(true);
+    }, 4000); // 4 seconds
+  };
+
+  const handleLogoTouchEnd = () => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+  };
+
+  // Admin handlers
+  const handleAdminCodeSuccess = () => {
+    setShowAdminCodeModal(false);
+    setShowAdminToggleModal(true);
+  };
+
+  const handleStatusToggle = async (newStatus: boolean) => {
+    await updatePromotionStatus(newStatus);
+    setCurrentPromotionStatus(newStatus);
+    
+    // Refresh promotion display
+    const promotionUrl = await getPromotionImage();
+    setHasPromotion(!!promotionUrl);
+    setCurrentPromotionImage(promotionUrl);
+  };
+
+  const handleImageUpload = async (file: File) => {
+    const imageUrl = await uploadPromotionImage(file);
+    await updatePromotionImage(imageUrl);
+    setCurrentPromotionImage(imageUrl);
+    
+    // Refresh promotion display
+    const promotionUrl = await getPromotionImage();
+    setHasPromotion(!!promotionUrl);
+  };
 
   const filteredAndSortedItems = useMemo(() => {
     let filtered = menuItems.filter(item => {
@@ -270,11 +360,19 @@ export default function Home() {
       {franchise && (
         <div className="relative">
           {/* Landscape Logo */}
-          <div className="h-32 md:h-40 overflow-hidden bg-black">
+          <div 
+            ref={logoRef}
+            className="h-32 md:h-40 overflow-hidden bg-black cursor-pointer select-none"
+            onMouseDown={handleLogoMouseDown}
+            onMouseUp={handleLogoMouseUp}
+            onMouseLeave={handleLogoMouseLeave}
+            onTouchStart={handleLogoTouchStart}
+            onTouchEnd={handleLogoTouchEnd}
+          >
             <img
               src={franchise.logoUrl || "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1200&h=200&fit=crop"}
               alt="Restaurant Logo"
-              className="w-full h-full object-contain"
+              className="w-full h-full object-contain pointer-events-none"
               style={{ objectFit: 'contain' }}
             />
           </div>
@@ -375,6 +473,23 @@ export default function Home() {
           isVisible={showOfferButton}
         />
       )}
+
+      {/* Admin Code Modal */}
+      <AdminCodeModal
+        isOpen={showAdminCodeModal}
+        onClose={() => setShowAdminCodeModal(false)}
+        onSuccess={handleAdminCodeSuccess}
+      />
+
+      {/* Admin Toggle Modal */}
+      <AdminToggleModal
+        isOpen={showAdminToggleModal}
+        onClose={() => setShowAdminToggleModal(false)}
+        currentStatus={currentPromotionStatus}
+        currentImageUrl={currentPromotionImage}
+        onStatusToggle={handleStatusToggle}
+        onImageUpload={handleImageUpload}
+      />
     </div>
   );
 }
